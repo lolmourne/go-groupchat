@@ -175,7 +175,6 @@ func (dbr *DBResource) GetRooms(userID int64) ([]model.Room, error) {
 			})
 		}
 	}
-	log.Println(resultRooms)
 
 	return resultRooms, err
 }

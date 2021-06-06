@@ -11,7 +11,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/lolmourne/go-accounts/client/userauth"
 	userAuth "github.com/lolmourne/go-accounts/client/userauth"
 	"github.com/lolmourne/go-groupchat/resource/groupchat"
 	groupchat2 "github.com/lolmourne/go-groupchat/usecase/groupchat"
@@ -27,13 +26,13 @@ var groupChatUsecase groupchat2.UsecaseItf
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	dbInit, err := sqlx.Connect("postgres", "host=34.101.216.10 user=skilvul password=skilvul123apa dbname=skilvul-groupchat sslmode=disable")
+	dbInit, err := sqlx.Connect("postgres", "host=34.101.255.14 user=skilvul password=skilvul123apa dbname=skilvul-groupchat sslmode=disable")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "34.101.216.10:6379",
+		Addr:     "34.101.255.14:6379",
 		Password: "skilvulredis", // no password set
 		DB:       0,              // use default DB
 	})
@@ -42,10 +41,11 @@ func main() {
 
 	dbRoomResource = dbRoomRsc
 
-	userClient = userauth.NewClient("http://localhost:7070", time.Duration(30)*time.Second)
+	//userClient = userauth.NewClient("http://localhost:7070", time.Duration(30)*time.Second)
+	userClient = userAuth.NewGrpcClient("127.0.0.1:7575")
 	groupChatUsecase = groupchat2.NewUseCase(dbRoomRsc)
 
-	redisClient := redisCli.New(redisCli.SINGLE_MODE, "34.101.216.10:6379", 10,
+	redisClient := redisCli.New(redisCli.SINGLE_MODE, "34.101.255.14:6379", 10,
 		redigo.DialReadTimeout(time.Duration(30)*time.Second),
 		redigo.DialWriteTimeout(time.Duration(30)*time.Second),
 		redigo.DialConnectTimeout(time.Duration(5)*time.Second),
@@ -206,7 +206,6 @@ func getJoinedRoom(c *gin.Context) {
 
 func getRoomList(c *gin.Context) {
 	userID := c.GetInt64("uid")
-	log.Println(userID)
 	rooms, err := groupChatUsecase.GetRoomList(userID)
 	log.Println(rooms)
 
